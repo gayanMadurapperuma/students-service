@@ -1,0 +1,55 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Student {
+  id: Float!
+  firstName: String!
+  middleName: String
+  lastName: String!
+  email: String!
+  dob: DateTime!
+  age: Float!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Query {
+  getAllStudents: [Student!]!
+  getStudentById(id: Int!): Student!
+}
+
+type Mutation {
+  createStudent(studentInput: StudentCreateDTO!): Student!
+  bulkStudentCreate(students: [StudentBulkCreateDTO!]!): Boolean!
+  updateStudent(studentInput: studentUpdateDTO!, id: Float!): Student!
+  removeStudent(id: Float!): Float!
+}
+
+input StudentCreateDTO {
+  firstName: String!
+  middleName: String
+  lastName: String!
+  email: String!
+  dob: DateTime!
+}
+
+input StudentBulkCreateDTO {
+  firstName: String!
+  middleName: String
+  lastName: String!
+  email: String!
+  dob: DateTime!
+  age: Float!
+}
+
+input studentUpdateDTO {
+  firstName: String
+  middleName: String
+  lastName: String
+  email: String
+  dob: DateTime
+}
