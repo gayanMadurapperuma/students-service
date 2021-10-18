@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import * as moment from 'moment';
 import { Student } from './entities/student.entity';
 import { StudentService } from './student.service';
 
@@ -25,11 +26,31 @@ describe('student service', () => {
   };
 
   const studentRepository = {
-    create: jest.fn().mockImplementation((dto) => dto),
+    create: jest.fn().mockImplementation((dto) => {
+      const { age, dob } = dto;
+      if (age) {
+        return dto;
+      }
+      return {
+        ...dto,
+        age: moment().diff(dob, 'years', false),
+      };
+    }),
     save: jest.fn().mockImplementation((vlu) => Promise.resolve(vlu)),
     find: jest.fn().mockImplementation(() => Promise.resolve([student])),
     findOne: jest.fn().mockImplementation(() => Promise.resolve(student)),
     remove: jest.fn().mockImplementation(() => Promise.resolve(student)),
+    findOneOrFail: jest.fn().mockImplementation((id) =>
+      Promise.resolve({
+        id,
+        firstName: 'test_fir',
+        lastName: 'test_last',
+        middleName: 'test_middl',
+        email: 'test@gmail.com',
+        dob: new Date('2000-10-20'),
+        age: 20,
+      }),
+    ),
   };
 
   beforeEach(async () => {
@@ -48,6 +69,38 @@ describe('student service', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  it('should create student', async () => {
+    expect(
+      await service.create({
+        firstName: 'test_fir',
+        lastName: 'test_last',
+        middleName: 'test_middl',
+        email: 'test@gmail.com',
+        dob: new Date('2000-10-20'),
+      }),
+    ).toEqual({
+      firstName: 'test_fir',
+      lastName: 'test_last',
+      middleName: 'test_middl',
+      email: 'test@gmail.com',
+      dob: new Date('2000-10-20'),
+      age: 20,
+      createdAt: expect.anything(),
+    });
+  });
+
+  it('should return student that belongs to given Id', async () => {
+    expect(await service.findOne(1)).toEqual({
+      id: 1,
+      firstName: 'test_fir',
+      lastName: 'test_last',
+      middleName: 'test_middl',
+      email: 'test@gmail.com',
+      dob: new Date('2000-10-20'),
+      age: 20,
+    });
   });
 
   it('should insert bulk student list and return true', async () => {
